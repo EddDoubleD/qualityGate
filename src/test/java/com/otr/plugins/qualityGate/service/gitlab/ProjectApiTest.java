@@ -2,8 +2,10 @@ package com.otr.plugins.qualityGate.service.gitlab;
 
 import com.otr.plugins.qualityGate.model.gitlab.Project;
 import lombok.SneakyThrows;
+import org.assertj.core.util.Arrays;
 import org.junit.jupiter.api.Test;
 
+import java.lang.reflect.Array;
 import java.net.http.HttpRequest;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -19,7 +21,8 @@ class ProjectApiTest {
         GitLabApiExecutor executor = mock(GitLabApiExecutor.class);
         HttpRequest request = mock(HttpRequest.class);
         when(executor.buildGetRequest(anyString())).thenReturn(request);
-        when(executor.execute(request, Project.class)).thenReturn(new Project(1L, "name", "description"));
+        Project[] projects = new Project[] {new Project(1L, "name", "description")};
+        when(executor.execute(request, Project[].class)).thenReturn(projects);
         ProjectApi projectApi = new ProjectApi(executor);
         assertTrue(projectApi.loadProjectByName("name").isPresent());
     }
