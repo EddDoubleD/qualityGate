@@ -3,7 +3,6 @@ package com.otr.plugins.qualityGate.controller;
 import com.otr.plugins.qualityGate.exceptions.HttpClientException;
 import com.otr.plugins.qualityGate.model.gitlab.Project;
 import com.otr.plugins.qualityGate.model.gitlab.Tag;
-import com.otr.plugins.qualityGate.model.gitlab.request.RequestTagDto;
 import com.otr.plugins.qualityGate.model.gitlab.response.CompareResult;
 import com.otr.plugins.qualityGate.service.gitlab.CompareApi;
 import com.otr.plugins.qualityGate.service.gitlab.ProjectApi;

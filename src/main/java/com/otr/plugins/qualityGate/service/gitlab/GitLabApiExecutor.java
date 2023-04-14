@@ -58,7 +58,6 @@ public class GitLabApiExecutor {
                 Error error = JsonUtils.deserialize(response.body(), Error.class);
                 throw new HttpClientException(error.message());
             }
-
             return JsonUtils.deserialize(response.body(), clazz);
         } catch (IOException | InterruptedException e) {
             log.error(e.getMessage(), e);

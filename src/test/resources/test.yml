@@ -1,0 +1,11 @@
+spring:
+  main:
+    allow-bean-definition-overriding: true
+quality-gate:
+  startCommandLineRunner: false
+  rootSettingsPath: src/test/resources/settings
+  jiraSettingsPath: jira.json
+  mailSettingsPath: mail.json
+  gitlabSettingsPath: gitlab.json
+  issueTypes: ["task", "bug"]
+  issueLinks: ["sup"]

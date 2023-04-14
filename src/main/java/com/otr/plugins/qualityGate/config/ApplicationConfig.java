@@ -31,6 +31,7 @@ public class ApplicationConfig {
     String jiraSettingsPath;
     String mailSettingsPath;
     String gitlabSettingsPath;
+    boolean startCommandLineRunner;
 
     Set<String> issueTypes;
     Set<String> issueLinks;

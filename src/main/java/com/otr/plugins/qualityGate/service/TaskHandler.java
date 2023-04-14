@@ -18,7 +18,6 @@ import org.springframework.stereotype.Component;
 
 import java.net.URISyntaxException;
 import java.util.*;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -33,9 +32,6 @@ public class TaskHandler {
     private static final String WARNING = "WARNING";
     private static final String SUCCESS = "SUCCESS";
 
-    private static final String REGEX = "\\\\b\\w{2,5}-\\d{1,10}";
-    private static final Pattern PATTERN = Pattern.compile(REGEX);
-
 
     ProjectApi projectApi;
     TagApi tagApi;
@@ -44,13 +40,13 @@ public class TaskHandler {
     JiraTaskService jiraTaskService;
 
     /**
+     * Checking the consistency of a section of code between specified intervals
      *
-     * @param projectName
-     * @param tagMask
-     * @param branch
-     * @param tasks
-     *
-     * @return
+     * @param projectName gitlab project name
+     * @param tagMask     tag search mask, or tag name
+     * @param branch      specifies the name of the tag or branch. If a branch is specified, the HEAD state will be taken as a comparison
+     * @param tasks       list of issues to check
+     * @return result of checking, valid keys: SUCCESS, WARNING, ERROR
      */
     public Map<String, String> handle(String projectName, String tagMask, String branch, String tasks) {
         Map<String, String> result = new HashMap<>();
@@ -71,8 +67,7 @@ public class TaskHandler {
                 return result;
             }
             // Form a list of tasks that are currently in the branch
-            Optional<CompareResult> compareResult = compareApi.getCompareCommits(project.get().id(), tag.get().name(),
-                    branch);
+            Optional<CompareResult> compareResult = compareApi.getCompareCommits(project.get().id(), tag.get().name(), branch);
 
             if (compareResult.isEmpty()) {
                 result.put(WARNING, "Compare " + tag.get().name() + " -> " + branch + " result is empty");
@@ -80,23 +75,15 @@ public class TaskHandler {
             }
 
             final Set<String> currentTasks = new HashSet<>();
-            compareResult.get()
-                    .commits()
-                    .forEach(commit -> currentTasks.addAll(TaskFilter.parseCommit(commit)));
+            compareResult.get().commits().forEach(commit -> currentTasks.addAll(TaskFilter.parseCommit(commit)));
 
-            Set<String> checkedTasks = currentTasks.stream()
-                    .filter(jiraTaskService::checkIssue)
-                    .collect(Collectors.toSet());
+            Set<String> checkedTasks = currentTasks.stream().filter(jiraTaskService::checkIssue).collect(Collectors.toSet());
 
             // actualization task, leave some feature and bugs on links
             Set<String> actualTask = jiraTaskService.transformTasks(tasks);
-            result.put(SUCCESS, checkedTasks.stream()
-                    .filter(actualTask::contains)
-                    .collect( Collectors.joining(",")));
+            result.put(SUCCESS, checkedTasks.stream().filter(actualTask::contains).collect(Collectors.joining(",")));
 
-            result.put(WARNING, checkedTasks.stream()
-                    .filter(task -> !actualTask.contains(task))
-                    .collect( Collectors.joining(",")));
+            result.put(WARNING, checkedTasks.stream().filter(task -> !actualTask.contains(task)).collect(Collectors.joining(",")));
 
         } catch (URISyntaxException | HttpClientException e) {
             log.error(e.getMessage(), e);
@@ -105,7 +92,7 @@ public class TaskHandler {
         }
 
 
-        return  result;
+        return result;
     }
 
 }
