@@ -16,6 +16,7 @@ public class TaskFilter {
 
     /**
      * Handling commit messages and headers
+     *
      * @param commit input commit
      * @return task ticket
      */
