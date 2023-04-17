@@ -1,6 +1,6 @@
 package com.otr.plugins.qualityGate.service.mail;
 
-import com.otr.plugins.qualityGate.controller.MailException;
+import com.otr.plugins.qualityGate.exceptions.MailException;
 import com.otr.plugins.qualityGate.model.mail.MailSettings;
 import com.otr.plugins.qualityGate.utils.ResourceLoader;
 import lombok.SneakyThrows;
@@ -146,8 +146,7 @@ class SendMailServiceTest {
     void testBuildHtml() {
         Mockito.when(mailSettings.isUseNotification()).thenReturn(true);
         // fool test, with blank template
-        Assertions.assertNull((new SendMailService(mailSettings, smtpAuthenticator))
-                .buildHtml(null, Collections.emptyList()));
+        Assertions.assertNull((new SendMailService(mailSettings, smtpAuthenticator)).buildHtml(null, Collections.emptyList()));
         //
         Mockito.when(mailSettings.getSignature()).thenReturn("dev_team");
         SendMailService mailService = new SendMailService(mailSettings, smtpAuthenticator);
