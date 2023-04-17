@@ -1,6 +1,6 @@
 package com.otr.plugins.qualityGate.service.mail;
 
-import com.otr.plugins.qualityGate.controller.MailException;
+import com.otr.plugins.qualityGate.exceptions.MailException;
 import com.otr.plugins.qualityGate.model.mail.MailSettings;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -111,13 +111,9 @@ public class SendMailService {
             return null;
         }
         // Select messages without errors
-        List<Map<String, String>> success = report.stream()
-                .filter(m -> !m.containsKey("error"))
-                .collect(Collectors.toList());
+        List<Map<String, String>> success = report.stream().filter(m -> !m.containsKey("error")).collect(Collectors.toList());
         // Select messages with errors
-        List<Map<String, String>> error = report.stream()
-                .filter(m -> m.containsKey("error"))
-                .collect(Collectors.toList());
+        List<Map<String, String>> error = report.stream().filter(m -> m.containsKey("error")).collect(Collectors.toList());
 
         VelocityContext context = new VelocityContext();
         // pre-trained parameters

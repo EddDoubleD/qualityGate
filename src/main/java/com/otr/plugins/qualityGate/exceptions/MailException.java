@@ -1,8 +1,5 @@
-package com.otr.plugins.qualityGate.controller;
+package com.otr.plugins.qualityGate.exceptions;
 
-/**
- * Исключение перехватчик
- */
 public class MailException extends Exception {
 
 
