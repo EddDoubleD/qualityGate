@@ -9,8 +9,8 @@ import net.rcarz.jiraclient.JiraClient;
 import net.rcarz.jiraclient.JiraException;
 import org.springframework.stereotype.Component;
 
-import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
@@ -25,35 +25,34 @@ public class JiraTaskService {
 
     JiraClient jiraClient;
 
-    public Set<String> transformTasks(String tasks) {
+    public Set<String> transformTasks(List<String> tasks) {
         final Set<String> result = new HashSet<>();
-        Arrays.stream(tasks.split(DELIMITER))
-                .forEach(id -> {
-                    try {
-                        Issue issue = jiraClient.getIssue(id);
-                        if (!checkIssue(issue)) {
-                            return;
+        tasks.forEach(id -> {
+            try {
+                Issue issue = jiraClient.getIssue(id);
+                if (!checkIssue(issue)) {
+                    return;
+                }
+
+                if (checkLinks(issue)) {
+                    issue.getIssueLinks().forEach(link -> {
+                        Issue inwards = link.getInwardIssue();
+                        if (checkIssue(inwards)) {
+                            result.add(inwards.getKey());
                         }
 
-                        if (checkLinks(issue)) {
-                            issue.getIssueLinks().forEach(link -> {
-                                Issue inwards = link.getInwardIssue();
-                                if (checkIssue(inwards)) {
-                                    result.add(inwards.getKey());
-                                }
-
-                                Issue outward = link.getOutwardIssue();
-                                if (checkIssue(outward)) {
-                                    result.add(outward.getKey());
-                                }
-                            });
-                        } else {
-                            result.add(id);
+                        Issue outward = link.getOutwardIssue();
+                        if (checkIssue(outward)) {
+                            result.add(outward.getKey());
                         }
-                    } catch (JiraException e) {
-                        log.error(e.getMessage(), e);
-                    }
-                });
+                    });
+                } else {
+                    result.add(id);
+                }
+            } catch (JiraException e) {
+                log.error(e.getMessage(), e);
+            }
+        });
 
 
         return result;
@@ -82,9 +81,7 @@ public class JiraTaskService {
      * @return the issue exists and matches the given types
      */
     public boolean checkIssue(Issue issue) {
-        return issue != null
-                && issue.getIssueType().getName() != null
-                && types.contains(issue.getIssueType().getName().toLowerCase());
+        return issue != null && issue.getIssueType().getName() != null && types.contains(issue.getIssueType().getName().toLowerCase());
     }
 
     /**
@@ -94,8 +91,6 @@ public class JiraTaskService {
      * @return the issue exists and matches the given links
      */
     public boolean checkLinks(Issue issue) {
-        return issue != null
-                && issue.getIssueType().getName() != null
-                && links.contains(issue.getIssueType().getName().toLowerCase());
+        return issue != null && issue.getIssueType().getName() != null && links.contains(issue.getIssueType().getName().toLowerCase());
     }
 }

@@ -2,6 +2,7 @@ package com.otr.plugins.qualityGate.config;
 
 import com.otr.plugins.qualityGate.exceptions.ApplicationStartException;
 import com.otr.plugins.qualityGate.exceptions.ResourceLoadingException;
+import com.otr.plugins.qualityGate.model.AppContext;
 import com.otr.plugins.qualityGate.model.gitlab.GitLabSettings;
 import com.otr.plugins.qualityGate.model.jira.JiraSettings;
 import com.otr.plugins.qualityGate.model.mail.MailSettings;
@@ -11,10 +12,12 @@ import com.otr.plugins.qualityGate.service.jira.NonVerifyingJiraClient;
 import com.otr.plugins.qualityGate.service.mail.SendMailService;
 import com.otr.plugins.qualityGate.utils.PropertyUtils;
 import com.otr.plugins.qualityGate.utils.ResourceLoader;
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.velocity.Template;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.AutoConfigureOrder;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -36,14 +39,32 @@ public class ApplicationConfig {
     @Autowired
     StandardServletEnvironment env;
 
+    AppContext context;
+
     String rootSettingsPath;
     String jiraSettingsPath;
     String mailSettingsPath;
     String gitlabSettingsPath;
+    String templatePath;
     boolean startCommandLineRunner;
 
     Set<String> issueTypes;
     Set<String> issueLinks;
+
+    Template template;
+
+    /**
+     * Fall if there is no template for printing or tickets
+     */
+    @PostConstruct
+    public void postConstruct() {
+        context = AppContext.builder().projectName(env.getProperty("project.name")).startTag(env.getProperty("tag.start")).endTag(env.getProperty("tag.end")).patch(env.getProperty("patch")).tasks(PropertyUtils.convertToList(env.getProperty("tasks"))).build();
+        try {
+            this.template = ResourceLoader.loadTemplate(rootSettingsPath, templatePath);
+        } catch (ResourceLoadingException e) {
+            log.warn("Template not loaded {}", e.getMessage());
+        }
+    }
 
     @Bean
     public NonVerifyingJiraClient jiraClient() throws ApplicationStartException {
@@ -87,7 +108,7 @@ public class ApplicationConfig {
             }
         } catch (ResourceLoadingException e) {
             // If the settings file is missing, we simply disable sending notifications
-            log.warn(e.getMessage(), e);
+            log.warn("Email setup not loaded {}", e.getMessage());
             mailSettings = new MailSettings(false);
         }
 
