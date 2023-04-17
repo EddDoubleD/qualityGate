@@ -5,6 +5,7 @@ import com.otr.plugins.qualityGate.service.gitlab.CompareApi;
 import com.otr.plugins.qualityGate.service.gitlab.ProjectApi;
 import com.otr.plugins.qualityGate.service.gitlab.TagApi;
 import com.otr.plugins.qualityGate.service.jira.JiraTaskService;
+import com.otr.plugins.qualityGate.service.mail.SendMailService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -26,6 +27,9 @@ class QualityGateApplicationTests {
 	@Autowired
 	TaskHandler taskHandler;
 
+	@Autowired
+	SendMailService sendMailService;
+
 	@Test
 	void contextLoads() {
 		assertThat(compareApi).isNotNull();
@@ -33,6 +37,6 @@ class QualityGateApplicationTests {
 		assertThat(tagApi).isNotNull();
 		assertThat(jiraTaskService).isNotNull();
 		assertThat(taskHandler).isNotNull();
+		assertThat(sendMailService).isNotNull();
 	}
-
 }

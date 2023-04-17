@@ -1,15 +1,15 @@
 package com.otr.plugins.qualityGate.utils;
 
 import com.otr.plugins.qualityGate.model.gitlab.Commit;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 
-public class TaskFilterTest {
+class TaskFilterTest {
 
     @Test
-    public void commitParserTest() {
+    void commitParserTest() {
         assertEquals(2, TaskFilter.parseCommit(new Commit(null,
                 "EXP-123", "Task by ticket SP-4107", null)).size());
         assertEquals(1, TaskFilter.parseCommit(new Commit(null,
