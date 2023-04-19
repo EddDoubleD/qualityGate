@@ -1,7 +1,7 @@
 package com.otr.plugins.qualityGate.service.mail;
 
+import com.otr.plugins.qualityGate.config.MailConfig;
 import com.otr.plugins.qualityGate.exceptions.MailException;
-import com.otr.plugins.qualityGate.model.mail.MailSettings;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.tools.generic.SortTool;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.mail.Message;
@@ -32,14 +33,10 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SendMailService {
 
-    MailSettings mailSettings;
+    @Autowired
+    MailConfig mailConfig;
 
     SmtpAuthenticator smtpAuthenticator;
-
-    public SendMailService(MailSettings mailSettings) {
-        this.mailSettings = mailSettings;
-        this.smtpAuthenticator = new SmtpAuthenticator(mailSettings.getUsername(), mailSettings.getPassword());
-    }
 
 
     /**
@@ -49,29 +46,29 @@ public class SendMailService {
      * @throws MailException handle MessagingException
      */
     public void sendEmails(String content) throws MailException {
-        if (!mailSettings.isUseNotification()) {
+        if (mailConfig.isDisable()) {
             return;
         }
         // preparing properties
         Properties properties = System.getProperties();
-        properties.setProperty("mail.smtp.host", mailSettings.getSmtpHost());
-        properties.setProperty("mail.smtp.port", mailSettings.getSmtpPort());
-        properties.setProperty("mail.smtp.auth", String.valueOf(mailSettings.isSmtpAuth()));
-        properties.setProperty("mail.smtp.starttls.enable", String.valueOf(mailSettings.isSmtpStartTls()));
+        properties.setProperty("mail.smtp.host", mailConfig.getHost());
+        properties.setProperty("mail.smtp.port", mailConfig.getPort());
+        properties.setProperty("mail.smtp.auth", String.valueOf(mailConfig.isSmtpAuth()));
+        properties.setProperty("mail.smtp.starttls.enable", String.valueOf(mailConfig.isStartTls()));
         // get a new Session object
         Session session = Session.getInstance(properties, smtpAuthenticator);
 
         MimeMessage message = new MimeMessage(session);
 
         try {
-            message.setFrom(new InternetAddress(mailSettings.getSender()));
+            message.setFrom(new InternetAddress(mailConfig.getSender()));
         } catch (MessagingException e) {
-            throw new MailException("Sender address error " + mailSettings.getSender() + " " + e.getMessage(), e);
+            throw new MailException("Sender address error " + mailConfig.getSender() + " " + e.getMessage(), e);
         }
 
         try {
             List<InternetAddress> result = new LinkedList<>();
-            mailSettings.getRecipients().forEach(s -> {
+            mailConfig.getRecipients().forEach(s -> {
                 try {
                     InternetAddress address = new InternetAddress(s);
                     result.add(address);
@@ -86,7 +83,7 @@ public class SendMailService {
         }
 
         try {
-            message.setSubject(Optional.ofNullable(mailSettings.getSubject()).orElse("Announcement Notification"));
+            message.setSubject(Optional.ofNullable(mailConfig.getSubject()).orElse("Announcement Notification"));
         } catch (MessagingException e) {
             // Well, you can live with it
             log.error(e.getMessage(), e);
@@ -107,7 +104,7 @@ public class SendMailService {
      * @return generated letter
      */
     public String buildHtml(Template template, List<Map<String, String>> report) {
-        if (!mailSettings.isUseNotification() || template == null) {
+        if (mailConfig.isDisable() || template == null) {
             return null;
         }
         // Select messages without errors
@@ -118,7 +115,7 @@ public class SendMailService {
         VelocityContext context = new VelocityContext();
         // pre-trained parameters
         context.put("sorter", new SortTool());
-        context.put("developmentTeam", mailSettings.getSignature());
+        context.put("developmentTeam", mailConfig.getSignature());
         context.put("issueList", success);
         context.put("issueErrorList", error);
 

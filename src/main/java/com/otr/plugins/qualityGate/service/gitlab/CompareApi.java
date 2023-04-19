@@ -1,7 +1,7 @@
 package com.otr.plugins.qualityGate.service.gitlab;
 
 import com.otr.plugins.qualityGate.exceptions.HttpClientException;
-import com.otr.plugins.qualityGate.model.gitlab.response.CompareResult;
+import com.otr.plugins.qualityGate.model.gitlab.CompareResult;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;

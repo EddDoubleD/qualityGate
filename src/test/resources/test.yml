@@ -8,9 +8,16 @@ spring:
     allow-bean-definition-overriding: true
 quality-gate:
   startCommandLineRunner: false
-  rootSettingsPath: src/test/resources/settings
-  jiraSettingsPath: jira.json
-  mailSettingsPath: test_mail.json
-  gitlabSettingsPath: gitlab.json
-  issueTypes: ["task", "bug"]
-  issueLinks: ["sup"]
+jira:
+  login: your.login
+  password: your.password
+  url: https://jira.your-company.com/
+  issueTypes: [ "develop", "bug", "sup" ]
+  issueLinks: [ "sup" ]
+smtp:
+  disable: true
+  username: user.name
+  password: user.password
+gitlab:
+  url: https://gitlab.com/api/v4/
+  token: gitlab.bot.token

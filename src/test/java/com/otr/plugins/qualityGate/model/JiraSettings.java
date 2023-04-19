@@ -1,4 +1,4 @@
-package com.otr.plugins.qualityGate.model.jira;
+package com.otr.plugins.qualityGate.model;
 
 import net.rcarz.jiraclient.BasicCredentials;
 import net.rcarz.jiraclient.ICredentials;

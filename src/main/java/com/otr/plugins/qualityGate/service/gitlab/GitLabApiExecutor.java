@@ -1,8 +1,8 @@
 package com.otr.plugins.qualityGate.service.gitlab;
 
+import com.otr.plugins.qualityGate.config.GitLabConfig;
 import com.otr.plugins.qualityGate.exceptions.HttpClientException;
 import com.otr.plugins.qualityGate.model.Error;
-import com.otr.plugins.qualityGate.model.gitlab.GitLabSettings;
 import com.otr.plugins.qualityGate.utils.JsonUtils;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -25,7 +25,7 @@ public class GitLabApiExecutor {
 
     private static final String PRIVATE_TOKEN = "PRIVATE-TOKEN";
 
-    GitLabSettings settings;
+    GitLabConfig settings;
 
     /**
      * Generating a request taking into account the settings
@@ -35,9 +35,7 @@ public class GitLabApiExecutor {
      * @throws URISyntaxException catch crookedly created url
      */
     public HttpRequest buildGetRequest(String url) throws URISyntaxException {
-        return HttpRequest.newBuilder()
-                .uri(new URI(settings.url() + url))
-                .header(PRIVATE_TOKEN, settings.token())
+        return HttpRequest.newBuilder().uri(new URI(settings.getUrl() + url)).header(PRIVATE_TOKEN, settings.getToken())
                 .GET()
                 .build();
     }

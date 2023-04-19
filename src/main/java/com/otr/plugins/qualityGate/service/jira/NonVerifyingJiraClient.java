@@ -1,17 +1,21 @@
 package com.otr.plugins.qualityGate.service.jira;
 
+import com.otr.plugins.qualityGate.config.JiraConfig;
 import jakarta.annotation.PostConstruct;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
-import net.rcarz.jiraclient.*;
+import net.rcarz.jiraclient.BasicCredentials;
+import net.rcarz.jiraclient.JiraClient;
+import net.rcarz.jiraclient.RestClient;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.conn.BasicClientConnectionManager;
+import org.springframework.stereotype.Component;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
@@ -25,25 +29,15 @@ import java.security.NoSuchAlgorithmException;
 @Slf4j
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Component
 public class NonVerifyingJiraClient extends JiraClient {
 
-    String uri;
-    ICredentials credentials;
-    @Getter
-    boolean disable;
+    JiraConfig config;
 
-    public NonVerifyingJiraClient(String uri) {
-        super(uri);
-        this.uri = uri;
-        this.credentials = null;
-        this.disable = true;
-    }
+    public NonVerifyingJiraClient(JiraConfig config) {
+        super(config.getUrl(), new BasicCredentials(config.getLogin(), config.getPassword()));
 
-    public NonVerifyingJiraClient(String uri, ICredentials credentials) {
-        super(uri, credentials);
-        this.uri = uri;
-        this.credentials = credentials;
-        this.disable = false;
+        this.config = config;
     }
 
 
@@ -53,7 +47,7 @@ public class NonVerifyingJiraClient extends JiraClient {
      */
     @PostConstruct
     public void hack() throws NoSuchAlgorithmException, KeyManagementException, NoSuchFieldException, IllegalAccessException {
-        if (disable) {
+        if (!config.isHack()) {
             return;
         }
 
@@ -69,6 +63,8 @@ public class NonVerifyingJiraClient extends JiraClient {
         DefaultHttpClient client = new DefaultHttpClient(ccm);
         java.lang.reflect.Field clientField = getClass().getSuperclass().getDeclaredField("restclient");
         clientField.setAccessible(true);
-        clientField.set(this, new RestClient(client, credentials, URI.create(uri)));
+        clientField.set(this,
+                new RestClient(client,
+                        new BasicCredentials(config.getLogin(), config.getPassword()), URI.create(config.getUrl())));
     }
 }

@@ -1,11 +1,11 @@
 package com.otr.plugins.qualityGate.service.jira;
 
+import com.otr.plugins.qualityGate.config.JiraConfig;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import net.rcarz.jiraclient.Issue;
-import net.rcarz.jiraclient.JiraClient;
 import net.rcarz.jiraclient.JiraException;
 import org.springframework.stereotype.Component;
 
@@ -18,12 +18,8 @@ import java.util.Set;
 @Component
 @Slf4j
 public class JiraTaskService {
-    private static final String DELIMITER = ";";
-
-    Set<String> types;
-    Set<String> links;
-
-    JiraClient jiraClient;
+    JiraConfig config;
+    NonVerifyingJiraClient jiraClient;
 
     public Set<String> transformTasks(List<String> tasks) {
         final Set<String> result = new HashSet<>();
@@ -68,7 +64,7 @@ public class JiraTaskService {
         try {
             return checkIssue(jiraClient.getIssue(key));
         } catch (JiraException e) {
-            log.error(e.getMessage(), e);
+            log.error(e.getMessage());
         }
 
         return false;
@@ -81,7 +77,7 @@ public class JiraTaskService {
      * @return the issue exists and matches the given types
      */
     public boolean checkIssue(Issue issue) {
-        return issue != null && issue.getIssueType().getName() != null && types.contains(issue.getIssueType().getName().toLowerCase());
+        return issue != null && issue.getIssueType().getName() != null && config.getTypes().contains(issue.getIssueType().getName().toLowerCase());
     }
 
     /**
@@ -91,6 +87,6 @@ public class JiraTaskService {
      * @return the issue exists and matches the given links
      */
     public boolean checkLinks(Issue issue) {
-        return issue != null && issue.getIssueType().getName() != null && links.contains(issue.getIssueType().getName().toLowerCase());
+        return issue != null && issue.getIssueType().getName() != null && config.getLinks().contains(issue.getIssueType().getName().toLowerCase());
     }
 }

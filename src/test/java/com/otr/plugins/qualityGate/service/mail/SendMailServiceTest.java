@@ -1,7 +1,7 @@
 package com.otr.plugins.qualityGate.service.mail;
 
+import com.otr.plugins.qualityGate.config.MailConfig;
 import com.otr.plugins.qualityGate.exceptions.MailException;
-import com.otr.plugins.qualityGate.model.mail.MailSettings;
 import com.otr.plugins.qualityGate.utils.ResourceLoader;
 import lombok.SneakyThrows;
 import org.apache.velocity.Template;
@@ -29,7 +29,7 @@ class SendMailServiceTest {
     private static final String HTML_NAME = "expected.html";
 
     @Mock
-    private MailSettings mailSettings;
+    private MailConfig mailSettings;
     @Mock
     private SmtpAuthenticator smtpAuthenticator;
 
@@ -39,12 +39,12 @@ class SendMailServiceTest {
     @SneakyThrows
     @BeforeEach
     public void setUp() {
-        mailSettings = mock(MailSettings.class);
+        mailSettings = mock(MailConfig.class);
         // simulate the work of settings
-        Mockito.when(mailSettings.getSmtpHost()).thenReturn("smtp.user_mail.com");
-        Mockito.when(mailSettings.getSmtpPort()).thenReturn("25");
+        Mockito.when(mailSettings.getHost()).thenReturn("smtp.user_mail.com");
+        Mockito.when(mailSettings.getPort()).thenReturn("25");
         Mockito.when(mailSettings.isSmtpAuth()).thenReturn(true);
-        Mockito.when(mailSettings.isSmtpStartTls()).thenReturn(false);
+        Mockito.when(mailSettings.isStartTls()).thenReturn(false);
         Mockito.when(mailSettings.getSubject()).thenReturn("Hello World");
 
         smtpAuthenticator = mock(SmtpAuthenticator.class);
@@ -56,11 +56,11 @@ class SendMailServiceTest {
 
     @Test
     public void testSendEmailsWhen() throws MailException {
-        Mockito.when(mailSettings.isUseNotification()).thenReturn(false);
+        Mockito.when(mailSettings.isDisable()).thenReturn(true);
         SendMailService mailService = new SendMailService(mailSettings, smtpAuthenticator);
         mailService.sendEmails(null);
 
-        Mockito.when(mailSettings.isUseNotification()).thenReturn(true);
+        Mockito.when(mailSettings.isDisable()).thenReturn(false);
         Mockito.when(mailSettings.getSender()).thenReturn("i'm a broken email address");
         Mockito.when(mailSettings.getRecipients()).thenReturn(Collections.singletonList("example@example.com"));
         // Assert
@@ -84,7 +84,7 @@ class SendMailServiceTest {
 
     @Test
     public void testSendEmailsWhenThrowTransportException() {
-        Mockito.when(mailSettings.isUseNotification()).thenReturn(true);
+        Mockito.when(mailSettings.isDisable()).thenReturn(false);
 
         Mockito.when(mailSettings.getSender()).thenReturn("test@domain.com");
         Mockito.when(mailSettings.getRecipients()).thenReturn(Collections.singletonList("example@example.com"));
@@ -103,7 +103,7 @@ class SendMailServiceTest {
 
     @Test
     public void testSendEmailsWithNullContent() throws Exception {
-        Mockito.when(mailSettings.isUseNotification()).thenReturn(true);
+        Mockito.when(mailSettings.isDisable()).thenReturn(false);
 
         Mockito.when(mailSettings.getSender()).thenReturn("test@domain.com");
         Mockito.when(mailSettings.getRecipients()).thenReturn(Collections.singletonList("example@example.com"));
@@ -125,7 +125,7 @@ class SendMailServiceTest {
     public void testSendEmails() throws Exception {
         final String message = "The sun is shining and the grass is green";
 
-        Mockito.when(mailSettings.isUseNotification()).thenReturn(true);
+        Mockito.when(mailSettings.isDisable()).thenReturn(false);
 
         Mockito.when(mailSettings.getSender()).thenReturn("test@domain.com");
         Mockito.when(mailSettings.getRecipients()).thenReturn(Collections.singletonList("example@example.com"));
@@ -144,7 +144,7 @@ class SendMailServiceTest {
 
     @Test
     void testBuildHtml() {
-        Mockito.when(mailSettings.isUseNotification()).thenReturn(true);
+        Mockito.when(mailSettings.isDisable()).thenReturn(false);
         // fool test, with blank template
         Assertions.assertNull((new SendMailService(mailSettings, smtpAuthenticator)).buildHtml(null, Collections.emptyList()));
         //

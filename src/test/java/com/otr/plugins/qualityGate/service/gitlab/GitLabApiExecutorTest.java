@@ -1,10 +1,12 @@
 package com.otr.plugins.qualityGate.service.gitlab;
 
+import com.otr.plugins.qualityGate.config.GitLabConfig;
 import com.otr.plugins.qualityGate.exceptions.HttpClientException;
 import com.otr.plugins.qualityGate.model.Example;
 import com.otr.plugins.qualityGate.model.gitlab.Commit;
-import com.otr.plugins.qualityGate.model.gitlab.GitLabSettings;
 import lombok.SneakyThrows;
+import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.MockedStatic;
 
@@ -21,8 +23,13 @@ class GitLabApiExecutorTest {
     private static final String URL = "https://gitlab.com/api/v4/";
     private static final String TOKEN = "TOKEN";
 
-    private static final GitLabSettings SETTINGS = new GitLabSettings(URL, TOKEN);
+    private static final GitLabConfig SETTINGS = new GitLabConfig();
 
+    @BeforeEach
+    public void setUp() {
+        SETTINGS.setUrl(URL);
+        SETTINGS.setToken(TOKEN);
+    }
 
     @SneakyThrows
     @Test

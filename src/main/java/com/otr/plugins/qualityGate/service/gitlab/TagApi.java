@@ -1,7 +1,6 @@
 package com.otr.plugins.qualityGate.service.gitlab;
 
 import com.otr.plugins.qualityGate.exceptions.HttpClientException;
-import com.otr.plugins.qualityGate.model.gitlab.request.RequestTagDto;
 import com.otr.plugins.qualityGate.model.gitlab.Tag;
 import lombok.AccessLevel;
 import lombok.experimental.FieldDefaults;
@@ -24,9 +23,9 @@ public class TagApi extends GitLabApi {
 
     /**
      * Searches for a tag by the given mask, get: /projects/:id/repository/tags?search=:mask
-     * @param id  gitlab project id
-     * @param mask tag mask
      *
+     * @param id   gitlab project id
+     * @param mask tag mask
      * @return last tag, matching the mask wrap to {@link Optional}, or {@link Optional#empty()}
      */
     public Optional<Tag> searchTag(Long id, String mask) throws URISyntaxException, HttpClientException {

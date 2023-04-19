@@ -1,12 +1,11 @@
 package com.otr.plugins.qualityGate.service.gitlab;
 
 import com.otr.plugins.qualityGate.model.gitlab.Commit;
-import com.otr.plugins.qualityGate.model.gitlab.response.CompareResult;
+import com.otr.plugins.qualityGate.model.gitlab.CompareResult;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 
 import java.net.http.HttpRequest;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 

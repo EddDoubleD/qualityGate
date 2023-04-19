@@ -1,6 +1,4 @@
-package com.otr.plugins.qualityGate.model.gitlab.response;
-
-import com.otr.plugins.qualityGate.model.gitlab.Commit;
+package com.otr.plugins.qualityGate.model.gitlab;
 
 import java.io.Serializable;
 import java.util.List;

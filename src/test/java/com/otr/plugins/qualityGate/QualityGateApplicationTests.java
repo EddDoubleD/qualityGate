@@ -13,8 +13,16 @@ import org.springframework.test.context.TestPropertySource;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-@TestPropertySource(properties = {"spring.config.location = src/test/resources/test.yml"})
-@SpringBootTest
+@TestPropertySource(properties = {
+		"spring.config.location = src/test/resources/test.yml",
+		"mod=NONE",
+		"gitlab.project=project",
+		"tag.start=v1",
+		"tag.end=v2",
+		"jira.patch=1",
+		"jira.tasks=1"
+})
+@SpringBootTest()
 class QualityGateApplicationTests {
 	@Autowired
 	CompareApi compareApi;

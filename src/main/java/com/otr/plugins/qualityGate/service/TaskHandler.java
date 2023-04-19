@@ -2,10 +2,10 @@ package com.otr.plugins.qualityGate.service;
 
 
 import com.otr.plugins.qualityGate.exceptions.HttpClientException;
-import com.otr.plugins.qualityGate.model.AppContext;
+import com.otr.plugins.qualityGate.model.LaunchParam;
+import com.otr.plugins.qualityGate.model.gitlab.CompareResult;
 import com.otr.plugins.qualityGate.model.gitlab.Project;
 import com.otr.plugins.qualityGate.model.gitlab.Tag;
-import com.otr.plugins.qualityGate.model.gitlab.response.CompareResult;
 import com.otr.plugins.qualityGate.service.gitlab.CompareApi;
 import com.otr.plugins.qualityGate.service.gitlab.ProjectApi;
 import com.otr.plugins.qualityGate.service.gitlab.TagApi;
@@ -33,20 +33,15 @@ public class TaskHandler {
     private static final String WARNING = "WARNING";
     private static final String SUCCESS = "SUCCESS";
 
+
     ProjectApi projectApi;
     TagApi tagApi;
     CompareApi compareApi;
+
     JiraTaskService jiraTaskService;
 
-
-    /**
-     * Checking the consistency of a section of code between specified intervals
-     *
-     * @param context command line params
-     * @return result of checking, valid keys: SUCCESS, WARNING, ERROR
-     */
-    public Map<String, String> handle(AppContext context) {
-        return handle(context.getProjectName(), context.getStartTag(), context.getEndTag(), context.getTasks());
+    public Map<String, String> handle(LaunchParam param) {
+        return handle(param.getProjectName(), param.getStartTag(), param.getEndTag(), param.getTasks());
     }
 
     /**
