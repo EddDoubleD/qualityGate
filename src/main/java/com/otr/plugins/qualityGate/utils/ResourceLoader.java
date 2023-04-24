@@ -21,15 +21,6 @@ import java.nio.file.Paths;
 public class ResourceLoader {
     private static final String PATH_SEPARATOR = "/";
 
-    public static <T> T loadJsonFile(String directoryPath, String filePath, Class<T> clazz) throws ResourceLoadingException {
-        String jsonText = loadTextFile(directoryPath, filePath);
-        try {
-            return JsonUtils.deserialize(jsonText, clazz);
-        } catch (Exception e) {
-            throw new ResourceLoadingException(String.format("Json %s conversion error", filePath), e);
-        }
-    }
-
     public static String loadTextFile(String directoryPath, String filePath) throws ResourceLoadingException {
         Path path = Paths.get(directoryPath + PATH_SEPARATOR + filePath);
         if (Files.isReadable(path)) {

@@ -1,7 +1,10 @@
 package com.otr.plugins.qualityGate.service.mail;
 
+import com.otr.plugins.qualityGate.config.MailConfig;
 import com.otr.plugins.qualityGate.exceptions.MailException;
-import com.otr.plugins.qualityGate.model.mail.MailSettings;
+import com.otr.plugins.qualityGate.exceptions.ResourceLoadingException;
+import com.otr.plugins.qualityGate.service.handler.Handler;
+import com.otr.plugins.qualityGate.utils.ResourceLoader;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -20,7 +23,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.StringWriter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 /**
@@ -32,14 +34,9 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SendMailService {
 
-    MailSettings mailSettings;
+    MailConfig mailConfig;
 
     SmtpAuthenticator smtpAuthenticator;
-
-    public SendMailService(MailSettings mailSettings) {
-        this.mailSettings = mailSettings;
-        this.smtpAuthenticator = new SmtpAuthenticator(mailSettings.getUsername(), mailSettings.getPassword());
-    }
 
 
     /**
@@ -49,29 +46,29 @@ public class SendMailService {
      * @throws MailException handle MessagingException
      */
     public void sendEmails(String content) throws MailException {
-        if (!mailSettings.isUseNotification()) {
+        if (mailConfig.isDisable()) {
             return;
         }
         // preparing properties
         Properties properties = System.getProperties();
-        properties.setProperty("mail.smtp.host", mailSettings.getSmtpHost());
-        properties.setProperty("mail.smtp.port", mailSettings.getSmtpPort());
-        properties.setProperty("mail.smtp.auth", String.valueOf(mailSettings.isSmtpAuth()));
-        properties.setProperty("mail.smtp.starttls.enable", String.valueOf(mailSettings.isSmtpStartTls()));
+        properties.setProperty("mail.smtp.host", mailConfig.getHost());
+        properties.setProperty("mail.smtp.port", mailConfig.getPort());
+        properties.setProperty("mail.smtp.auth", String.valueOf(mailConfig.isSmtpAuth()));
+        properties.setProperty("mail.smtp.starttls.enable", String.valueOf(mailConfig.isStartTls()));
         // get a new Session object
         Session session = Session.getInstance(properties, smtpAuthenticator);
 
         MimeMessage message = new MimeMessage(session);
 
         try {
-            message.setFrom(new InternetAddress(mailSettings.getSender()));
+            message.setFrom(new InternetAddress(mailConfig.getSender()));
         } catch (MessagingException e) {
-            throw new MailException("Sender address error " + mailSettings.getSender() + " " + e.getMessage(), e);
+            throw new MailException("Sender address error " + mailConfig.getSender() + " " + e.getMessage(), e);
         }
 
         try {
             List<InternetAddress> result = new LinkedList<>();
-            mailSettings.getRecipients().forEach(s -> {
+            mailConfig.getRecipients().forEach(s -> {
                 try {
                     InternetAddress address = new InternetAddress(s);
                     result.add(address);
@@ -86,7 +83,7 @@ public class SendMailService {
         }
 
         try {
-            message.setSubject(Optional.ofNullable(mailSettings.getSubject()).orElse("Announcement Notification"));
+            message.setSubject(Optional.ofNullable(mailConfig.getSubject()).orElse("Announcement Notification"));
         } catch (MessagingException e) {
             // Well, you can live with it
             log.error(e.getMessage(), e);
@@ -103,24 +100,29 @@ public class SendMailService {
     /**
      * generates html from a template
      *
-     * @param report jira-task processing result
-     * @return generated letter
+     * @param report analysis result
+     * @return generated message from template
      */
-    public String buildHtml(Template template, List<Map<String, String>> report) {
-        if (!mailSettings.isUseNotification() || template == null) {
+    public String buildHtml(Template template, Map<Handler.ResulType, Handler.Result> report) throws ResourceLoadingException {
+        if (mailConfig.isDisable()) {
             return null;
         }
+
+        if (template == null) {
+            template = ResourceLoader.loadTemplate(mailConfig.getDirectoryPath(), mailConfig.getTemplate());
+        }
+
         // Select messages without errors
-        List<Map<String, String>> success = report.stream().filter(m -> !m.containsKey("error")).collect(Collectors.toList());
+        Handler.Result success = report.get(Handler.ResulType.SUCCESS);
         // Select messages with errors
-        List<Map<String, String>> error = report.stream().filter(m -> m.containsKey("error")).collect(Collectors.toList());
+        Handler.Result error = Optional.ofNullable(report.get(Handler.ResulType.ERROR)).orElse(new Handler.Result());
 
         VelocityContext context = new VelocityContext();
         // pre-trained parameters
         context.put("sorter", new SortTool());
-        context.put("developmentTeam", mailSettings.getSignature());
-        context.put("issueList", success);
-        context.put("issueErrorList", error);
+        context.put("developmentTeam", mailConfig.getSignature());
+        context.put("success", success.getContent());
+        context.put("error", error.getContent());
 
         StringWriter writer = new StringWriter();
         template.merge(context, writer);

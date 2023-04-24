@@ -1,30 +1,31 @@
 package com.otr.plugins.qualityGate.service.mail;
 
+import com.otr.plugins.qualityGate.config.MailConfig;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.experimental.FieldDefaults;
+import org.springframework.stereotype.Component;
 
 import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 
 @Getter
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
+@Component
 public class SmtpAuthenticator extends Authenticator {
 
-    String username;
-    String password;
+    MailConfig config;
 
-    public SmtpAuthenticator(String username, String password) {
+
+    public SmtpAuthenticator(MailConfig config) {
         super();
-
-        this.username = username;
-        this.password = password;
+        this.config = config;
     }
 
     @Override
     public PasswordAuthentication getPasswordAuthentication() {
-        if ((username != null) && (!username.isEmpty()) && (password != null) && (!password.isEmpty())) {
-            return new PasswordAuthentication(username, password);
+        if ((config.getUsername() != null) && (!config.getUsername().isEmpty()) && (config.getPassword() != null) && (!config.getPassword().isEmpty())) {
+            return new PasswordAuthentication(config.getUsername(), config.getPassword());
         }
 
         return null;

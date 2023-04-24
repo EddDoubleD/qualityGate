@@ -6,9 +6,9 @@
 </head>
 <body>
     <div>
-        #foreach($s in $success)
+        #foreach($issue in $issueList)
         <tr>
-            <td>$s.param</td>
+            <td>$issue.param</td>
         #end
         </tr>
     </div>
