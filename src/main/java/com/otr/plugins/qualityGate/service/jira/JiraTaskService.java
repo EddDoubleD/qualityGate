@@ -9,9 +9,10 @@ import net.rcarz.jiraclient.Issue;
 import net.rcarz.jiraclient.JiraException;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @AllArgsConstructor
@@ -21,72 +22,35 @@ public class JiraTaskService {
     JiraConfig config;
     NonVerifyingJiraClient jiraClient;
 
-    public Set<String> transformTasks(List<String> tasks) {
-        final Set<String> result = new HashSet<>();
-        tasks.forEach(id -> {
-            try {
-                Issue issue = jiraClient.getIssue(id);
-                if (!checkIssue(issue)) {
-                    return;
-                }
+    public String getDescription(String key) throws JiraException {
+        Issue issue = jiraClient.getIssue(key);
+        return issue.getDescription();
+    }
 
-                if (checkLinks(issue)) {
-                    issue.getIssueLinks().forEach(link -> {
-                        Issue inwards = link.getInwardIssue();
-                        if (checkIssue(inwards)) {
-                            result.add(inwards.getKey());
-                        }
 
-                        Issue outward = link.getOutwardIssue();
-                        if (checkIssue(outward)) {
-                            result.add(outward.getKey());
-                        }
-                    });
-                } else {
-                    result.add(id);
-                }
-            } catch (JiraException e) {
-                log.error(e.getMessage(), e);
-            }
-        });
-
+    public Set<String> parseTicket(String... messages) {
+        Set<String> result = new HashSet<>();
+        Arrays.stream(messages)
+                .map(message -> config.getPattern().matcher(message))
+                .forEachOrdered(matcher -> {
+                    while (matcher.find()) {
+                        result.add(matcher.group());
+                    }
+                });
 
         return result;
     }
 
-    /**
-     * Checking a task by key
-     *
-     * @param key issue key
-     * @return the issue exists and matches the given types
-     */
-    public boolean checkIssue(String key) {
-        try {
-            return checkIssue(jiraClient.getIssue(key));
-        } catch (JiraException e) {
-            log.error(e.getMessage());
-        }
-
-        return false;
-    }
 
     /**
-     * Checks issue for given types
+     * Checks the message for the presence of a task number by regular expression
      *
-     * @param issue preloaded Jira issue
-     * @return the issue exists and matches the given types
+     * @param messages messages to check
+     * @return is there an error number in the message ?
      */
-    public boolean checkIssue(Issue issue) {
-        return issue != null && issue.getIssueType().getName() != null && config.getTypes().contains(issue.getIssueType().getName().toLowerCase());
-    }
-
-    /**
-     * Checking the issue task for compliance with the link format
-     *
-     * @param issue preloaded Jira issue
-     * @return the issue exists and matches the given links
-     */
-    public boolean checkLinks(Issue issue) {
-        return issue != null && issue.getIssueType().getName() != null && config.getLinks().contains(issue.getIssueType().getName().toLowerCase());
+    public boolean checkTask(String... messages) {
+        return Arrays.stream(messages)
+                .map(message -> config.getPattern().matcher(message))
+                .anyMatch(Matcher::find);
     }
 }

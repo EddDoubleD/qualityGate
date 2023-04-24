@@ -3,22 +3,22 @@ package com.otr.plugins.qualityGate.service.handler;
 import com.otr.plugins.qualityGate.config.post.Type;
 import com.otr.plugins.qualityGate.config.post.TypeSafeQualifier;
 import com.otr.plugins.qualityGate.model.LaunchParam;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
 import java.util.Map;
 
-
+/**
+ * The handler does nothing
+ */
 @Component
 @TypeSafeQualifier(Type.NONE)
-@Qualifier("easy")
-public class EasyHandler implements Handler {
+public class NoneHandler implements Handler {
 
+    /**
+     * return blank map
+     */
     @Override
-    public Map<String, Object> handle(LaunchParam param) {
-        return new HashMap<>() {{
-            put("SUCCESS", "work is easy");
-        }};
+    public Map<ResulType, Result> handle(LaunchParam param) {
+        return Handler.super.handle(param);
     }
 }

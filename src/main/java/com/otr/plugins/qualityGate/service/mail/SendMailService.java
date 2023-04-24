@@ -2,6 +2,9 @@ package com.otr.plugins.qualityGate.service.mail;
 
 import com.otr.plugins.qualityGate.config.MailConfig;
 import com.otr.plugins.qualityGate.exceptions.MailException;
+import com.otr.plugins.qualityGate.exceptions.ResourceLoadingException;
+import com.otr.plugins.qualityGate.service.handler.Handler;
+import com.otr.plugins.qualityGate.utils.ResourceLoader;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
@@ -9,7 +12,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.tools.generic.SortTool;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.mail.Message;
@@ -21,7 +23,6 @@ import javax.mail.internet.InternetAddress;
 import javax.mail.internet.MimeMessage;
 import java.io.StringWriter;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 /**
@@ -33,7 +34,6 @@ import java.util.stream.Collectors;
 @Slf4j
 public class SendMailService {
 
-    @Autowired
     MailConfig mailConfig;
 
     SmtpAuthenticator smtpAuthenticator;
@@ -100,24 +100,29 @@ public class SendMailService {
     /**
      * generates html from a template
      *
-     * @param report jira-task processing result
-     * @return generated letter
+     * @param report analysis result
+     * @return generated message from template
      */
-    public String buildHtml(Template template, List<Map<String, String>> report) {
-        if (mailConfig.isDisable() || template == null) {
+    public String buildHtml(Template template, Map<Handler.ResulType, Handler.Result> report) throws ResourceLoadingException {
+        if (mailConfig.isDisable()) {
             return null;
         }
+
+        if (template == null) {
+            template = ResourceLoader.loadTemplate(mailConfig.getDirectoryPath(), mailConfig.getTemplate());
+        }
+
         // Select messages without errors
-        List<Map<String, String>> success = report.stream().filter(m -> !m.containsKey("error")).collect(Collectors.toList());
+        Handler.Result success = report.get(Handler.ResulType.SUCCESS);
         // Select messages with errors
-        List<Map<String, String>> error = report.stream().filter(m -> m.containsKey("error")).collect(Collectors.toList());
+        Handler.Result error = Optional.ofNullable(report.get(Handler.ResulType.ERROR)).orElse(new Handler.Result());
 
         VelocityContext context = new VelocityContext();
         // pre-trained parameters
         context.put("sorter", new SortTool());
         context.put("developmentTeam", mailConfig.getSignature());
-        context.put("issueList", success);
-        context.put("issueErrorList", error);
+        context.put("success", success.getContent());
+        context.put("error", error.getContent());
 
         StringWriter writer = new StringWriter();
         template.merge(context, writer);

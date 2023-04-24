@@ -84,4 +84,10 @@ public class MailConfig {
      */
     @Value("${smtp.signature : Development team}")
     String signature;
+
+    @Value("${smtp.directoryPath : src/main/resources}")
+    String directoryPath;
+
+    @Value("${smtp.template : email.vm}")
+    String template;
 }

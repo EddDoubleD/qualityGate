@@ -9,13 +9,13 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.mutable.MutableBoolean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @AllArgsConstructor
@@ -51,9 +51,19 @@ public class QualityGateApplication implements CommandLineRunner {
     @Override
     public void run(String... args) {
 
+        final MutableBoolean mark = new MutableBoolean( true);
         handlers.forEach((k, v) -> {
-            log.info("Start task {}", k);
-            log.info("Result task {}", v.handle(param));
+            if (mark.booleanValue()) {
+                log.info("Start task {}", k);
+                Map<Handler.ResulType, Handler.Result> result = v.handle(param);
+                log.info(String.valueOf(result.get(Handler.ResulType.SUCCESS)));
+                if (result.containsKey(Handler.ResulType.ERROR) && result.get(Handler.ResulType.ERROR).getContent().size() > 0) {
+                    log.error(String.valueOf(result.get(Handler.ResulType.ERROR)));
+                    mark.setValue(false);
+                }
+            } else {
+                log.warn("execution {} step will be skipped", k);
+            }
         });
 
         stopper.stop();

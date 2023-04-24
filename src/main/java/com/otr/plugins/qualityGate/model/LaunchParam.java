@@ -26,11 +26,11 @@ public class LaunchParam {
     @Value("${tag.end}")
     String endTag;
 
-    @Value("${jira.patch}")
+    @Value("${jira.patch : #{null}")
     String patch;
 
-    @Value("${jira.tasks}")
-    List<String> tasks;
+    @Value("${jira.tasks : null}")
+    List<String> tasks = new ArrayList<>();
 
     @PostConstruct
     public void resolveTasks() {

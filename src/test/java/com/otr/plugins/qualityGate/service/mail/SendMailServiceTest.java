@@ -2,6 +2,7 @@ package com.otr.plugins.qualityGate.service.mail;
 
 import com.otr.plugins.qualityGate.config.MailConfig;
 import com.otr.plugins.qualityGate.exceptions.MailException;
+import com.otr.plugins.qualityGate.service.handler.Handler;
 import com.otr.plugins.qualityGate.utils.ResourceLoader;
 import lombok.SneakyThrows;
 import org.apache.velocity.Template;
@@ -16,7 +17,8 @@ import org.mockito.Mockito;
 import javax.mail.Message;
 import javax.mail.MessagingException;
 import javax.mail.Transport;
-import java.util.*;
+import java.util.Collections;
+import java.util.HashMap;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
@@ -46,6 +48,9 @@ class SendMailServiceTest {
         Mockito.when(mailSettings.isSmtpAuth()).thenReturn(true);
         Mockito.when(mailSettings.isStartTls()).thenReturn(false);
         Mockito.when(mailSettings.getSubject()).thenReturn("Hello World");
+
+        Mockito.when(mailSettings.getDirectoryPath()).thenReturn("src/test/resources/settings");
+        Mockito.when(mailSettings.getTemplate()).thenReturn("email.vm");
 
         smtpAuthenticator = mock(SmtpAuthenticator.class);
 
@@ -142,21 +147,24 @@ class SendMailServiceTest {
         }
     }
 
+    @SneakyThrows
     @Test
     void testBuildHtml() {
-        Mockito.when(mailSettings.isDisable()).thenReturn(false);
+        Mockito.when(mailSettings.isDisable()).thenReturn(true);
         // fool test, with blank template
-        Assertions.assertNull((new SendMailService(mailSettings, smtpAuthenticator)).buildHtml(null, Collections.emptyList()));
+        Assertions.assertNull((new SendMailService(mailSettings, smtpAuthenticator)).buildHtml(null, Collections.emptyMap()));
         //
+        Mockito.when(mailSettings.isDisable()).thenReturn(false);
         Mockito.when(mailSettings.getSignature()).thenReturn("dev_team");
         SendMailService mailService = new SendMailService(mailSettings, smtpAuthenticator);
-        List<Map<String, String>> report = new ArrayList<>() {{
-            add(new HashMap<>() {{
-                put("param", "VALUE");
-            }});
-        }};
+        Handler.Result report = new Handler.Result();
+        report.add(new HashMap<>() {{
+            put("param", "VALUE");
+        }});
 
 
-        Assertions.assertEquals(expectedHtml, mailService.buildHtml(template, report));
+        Assertions.assertEquals(expectedHtml, mailService.buildHtml(template, new HashMap<>() {{
+            put(Handler.ResulType.SUCCESS, report);
+        }}));
     }
 }

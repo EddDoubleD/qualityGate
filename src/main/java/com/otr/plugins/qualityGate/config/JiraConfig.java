@@ -1,5 +1,6 @@
 package com.otr.plugins.qualityGate.config;
 
+import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -7,8 +8,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.regex.Pattern;
 
 @Setter
 @Getter
@@ -28,9 +28,14 @@ public class JiraConfig {
     @Value("${jira.hack : false}")
     boolean hack;
 
-    @Value("${jira.types:}")
-    Set<String> types = new HashSet<>();
+    @Value("${jira.mask: \\w{1,4}-\\d{1,10}}")
+    String mask;
 
-    @Value("${jira.links:}")
-    Set<String> links = new HashSet<>();
+    Pattern pattern;
+
+
+    @PostConstruct
+    public void setUp() {
+        this.pattern = Pattern.compile(mask);
+    }
 }
