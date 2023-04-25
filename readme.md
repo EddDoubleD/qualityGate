@@ -64,11 +64,15 @@ quality-gate:
 ```
 
 ## Build docker
+Use the liberica image, depending on the architecture of your runners:
+* bellsoft/liberica-openjdk-debian:17.0.6  for *arm64*
+* bellsoft/liberica-openjdk-debian:17.0.6-x86_64 for *amd64*
+
 ``` bash
 # maven build app 
 mvn -e clean install
 # build docker image 
-docker build --build-arg JAR_FILE=target/qualityGate-0.0.1-SNAPSHOT.jar -t edddoubled/quality_gate .
+docker build --build-arg JAR_FILE=target/qualityGate-0.0.1-SNAPSHOT.jar -t edddoubled/quality_gate:v1 .
 # run docker image
-docker run -d --name quality-gate -p 8080:8080 edddoubled/quality_gate
+docker run -d --name quality-gate edddoubled/quality_gate:v1
 ```
