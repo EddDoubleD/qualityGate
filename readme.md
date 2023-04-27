@@ -14,35 +14,8 @@ Application setup is divided into several modules, in the main setting, the path
 spring:
   main:
     allow-bean-definition-overriding: true
-quality-gate:
-  startCommandLineRunner: true
-  rootSettingsPath: src/main/resources/settings
-  jiraSettingsPath: jira.json
-  mailSettingsPath: mail.json
-  gitlabSettingsPath: gitlab.json
-  issueTypes: ["task", "bug"]
-  issueLinks: ["sup"]
 ```
-### gitlab.json
-Connection options to your gitlab server,
-the user whose token you specify must have access to maintenance projects<br/>
-The path to the configuration is set in the _application.yml_ parameter _gitlabSettingsPath_
-```json
-{
-  "url": "https://youre_company_gitlab/api/v4/",
-  "token": "Private-GitLab-Token"
-}
-```
-### jira.json
-Connection settings for your jira server<br/>
-The path to the configuration is set in the _application.yml_ parameter _jiraSettingsPath_
-```json
-{
-  "login": "corporate login",
-  "password": "corporate password",
-  "url": "https://youre_company_jira.com/"
-}
-```
+
 ## Usage
 
 ### GitLab stage yml-file
