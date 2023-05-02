@@ -54,15 +54,15 @@ public class QualityGateApplication implements CommandLineRunner {
         final MutableBoolean mark = new MutableBoolean( true);
         handlers.forEach((k, v) -> {
             if (mark.booleanValue()) {
-                log.info("Start task {}", k);
+                log.error("Start task {}", k);
                 Map<Handler.ResulType, Handler.Result> result = v.handle(param);
-                log.info(String.valueOf(result.get(Handler.ResulType.SUCCESS)));
+                log.error(String.valueOf(result.get(Handler.ResulType.SUCCESS)));
                 if (result.containsKey(Handler.ResulType.ERROR) && result.get(Handler.ResulType.ERROR).getContent().size() > 0) {
                     log.error(String.valueOf(result.get(Handler.ResulType.ERROR)));
                     mark.setValue(false);
                 }
             } else {
-                log.warn("execution {} step will be skipped", k);
+                log.error("execution {} step will be skipped", k);
             }
         });
 
