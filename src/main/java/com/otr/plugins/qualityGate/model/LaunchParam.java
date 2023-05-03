@@ -1,6 +1,5 @@
 package com.otr.plugins.qualityGate.model;
 
-import com.otr.plugins.qualityGate.config.post.Type;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Setter
 @Getter
@@ -26,10 +24,10 @@ public class LaunchParam {
     @Value("${tag.end}")
     String endTag;
 
-    @Value("${jira.patch : #{null}")
+    @Value("${jira.patch : #{null}}")
     String patch;
 
-    @Value("${jira.tasks : null}")
+    @Value("${jira.tasks}")
     List<String> tasks = new ArrayList<>();
 
     @PostConstruct

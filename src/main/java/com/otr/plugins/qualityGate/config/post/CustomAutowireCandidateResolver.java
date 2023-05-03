@@ -1,5 +1,6 @@
 package com.otr.plugins.qualityGate.config.post;
 
+import com.otr.plugins.qualityGate.service.jira.extractors.IssueExtractor;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;

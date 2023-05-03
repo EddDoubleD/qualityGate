@@ -7,6 +7,6 @@ package com.otr.plugins.qualityGate.config.post;
 public enum Type {
     // build change log
     CHANGELOG,
-    // nothing
+    LIST_OF,
     NONE
 }

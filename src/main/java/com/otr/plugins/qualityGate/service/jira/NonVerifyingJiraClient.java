@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import net.rcarz.jiraclient.BasicCredentials;
 import net.rcarz.jiraclient.JiraClient;
 import net.rcarz.jiraclient.RestClient;
+import net.rcarz.jiraclient.RestException;
+import net.sf.json.JSON;
 import org.apache.http.conn.ClientConnectionManager;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
@@ -19,9 +21,13 @@ import org.springframework.stereotype.Component;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
+import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.security.KeyManagementException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * Hacked jira-client
@@ -31,6 +37,8 @@ import java.security.NoSuchAlgorithmException;
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @Component
 public class NonVerifyingJiraClient extends JiraClient {
+
+    private static final String SEARCH = "rest/api/2/search";
 
     JiraConfig config;
 
