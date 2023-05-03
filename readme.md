@@ -11,11 +11,40 @@ Service application for customizing gitlab and jira integration
 Application setup is divided into several modules, in the main setting, the paths to the settings files are set
 ### application.yml
 ```yaml
-spring:
-  main:
-    allow-bean-definition-overriding: true
-```
+jira:
+  login: your jira login
+  password: your jira password
+  url: https://your-domain.atlassian.net/
+  mask: \w{2,4}-\d{1,10}
+  link:
+    LINK:
+      name: DEVELOPMENT
+      strategy: LINK
+      issueTypes: ["bug", "dev"]
+    jql:
+      name: доработка
+      strategy: JQL
+      jql: "project = PROJECT AND \"custom_field\" = #{key}"
+      issueTypes: ["bug", "dev"]
+    default:
+      name: DEFAULT
+      strategy: DEFAULT
 
+smtp:
+  disable: true
+  username: user.name
+  password: user.password
+  directoryPath: /
+  template: email.vm
+
+gitlab:
+  url: https://your-domain.gitlab.com
+  token: quality_gate_bot_token
+```
+Parameters that need to be masked can be set as application startup parameters, example:
+```bash
+java -jar app.jar --jira.login=log.in --jira.password=passw0rd ... --smtp.host-mail.server.com ...
+```
 ## Usage
 
 ### GitLab stage yml-file
