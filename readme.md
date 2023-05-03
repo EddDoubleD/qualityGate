@@ -22,7 +22,7 @@ jira:
       strategy: LINK
       issueTypes: ["bug", "dev"]
     jql:
-      name: доработка
+      name: DEVELOPMENT
       strategy: JQL
       jql: "project = PROJECT AND \"custom_field\" = #{key}"
       issueTypes: ["bug", "dev"]
