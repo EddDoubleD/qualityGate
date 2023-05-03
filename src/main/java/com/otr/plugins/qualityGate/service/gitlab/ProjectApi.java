@@ -31,4 +31,14 @@ public class ProjectApi extends GitLabApi {
         return Optional.of(projects[0]);
     }
 
+    public Optional<Project> loadProjectByName() throws URISyntaxException, HttpClientException {
+        HttpRequest request = executor.buildGetRequest(URL + executor.getSettings().getProjectName() + "");
+        Project[] projects = executor.execute(request, Project[].class);
+        if (projects == null || projects.length == 0) {
+            return Optional.empty();
+        }
+
+        return Optional.of(projects[0]);
+    }
+
 }

@@ -21,4 +21,7 @@ public class GitLabConfig {
 
     @Value("gitlab.token")
     String token;
+
+    @Value("${gitlab.project}")
+    String projectName;
 }

@@ -6,6 +6,7 @@ import com.otr.plugins.qualityGate.model.Error;
 import com.otr.plugins.qualityGate.utils.JsonUtils;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.Getter;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -25,6 +26,7 @@ public class GitLabApiExecutor {
 
     private static final String PRIVATE_TOKEN = "PRIVATE-TOKEN";
 
+    @Getter
     GitLabConfig settings;
 
     /**
