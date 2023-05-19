@@ -44,7 +44,7 @@ class JiraTaskServiceTest {
         NonVerifyingJiraClient client = mock(NonVerifyingJiraClient.class);
         Issue issue = mock(Issue.class);
         when(issue.getDescription()).thenReturn("description");
-        when(client.getIssue(anyString())).thenReturn(issue);
+        when(client.getIssue(anyString(), anyString())).thenReturn(issue);
         JiraTaskService jiraTaskService = new JiraTaskService(config, client, null);
         assertEquals("description", jiraTaskService.getDescription("KEY"));
     }
@@ -69,7 +69,7 @@ class JiraTaskServiceTest {
         DefaultExtractor defaultExtractor = new DefaultExtractor();
         IssueExtractorFactory factory = new IssueExtractorFactory(Collections.singletonMap("DEFAULT", defaultExtractor));
         NonVerifyingJiraClient jiraClient = mock(NonVerifyingJiraClient.class);
-        when(jiraClient.getIssue("BUg #1")).thenThrow(JiraException.class);
+        when(jiraClient.getIssue("BUg #1", "issuetype")).thenThrow(JiraException.class);
         Issue issue = mock(Issue.class);
         when(issue.getKey()).thenReturn("BUG #1");
         IssueType issueType = mock(IssueType.class);
@@ -78,7 +78,7 @@ class JiraTaskServiceTest {
         Status status = mock(Status.class);
         when(issue.getStatus()).thenReturn(status);
 
-        when(jiraClient.getIssue("BUG #1")).thenReturn(issue);
+        when(jiraClient.getIssue("BUG #1", "issuetype")).thenReturn(issue);
         JiraTaskService jiraTaskService = new JiraTaskService(config, jiraClient, factory);
         assertNotNull(jiraTaskService.additionalEnrichment(Arrays.asList("BUg #1", "BUG #1")));
         assertEquals(1, jiraTaskService.additionalEnrichment(Arrays.asList("BUg #1", "BUG #1")).size());
