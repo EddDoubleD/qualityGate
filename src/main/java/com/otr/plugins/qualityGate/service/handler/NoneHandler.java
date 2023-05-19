@@ -11,7 +11,7 @@ import java.util.Map;
  * The handler does nothing
  */
 @Component
-@TypeSafeQualifier(Type.NONE)
+@TypeSafeQualifier(Type.HELP)
 public class NoneHandler implements Handler {
 
     /**

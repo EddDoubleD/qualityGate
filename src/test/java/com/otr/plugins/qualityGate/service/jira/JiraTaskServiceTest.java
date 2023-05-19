@@ -1,12 +1,14 @@
 package com.otr.plugins.qualityGate.service.jira;
 
 import com.otr.plugins.qualityGate.config.JiraConfig;
+import com.otr.plugins.qualityGate.model.jira.CutIssue;
 import com.otr.plugins.qualityGate.service.jira.extractors.IssueExtractorFactory;
 import com.otr.plugins.qualityGate.service.jira.extractors.impl.DefaultExtractor;
 import lombok.SneakyThrows;
 import net.rcarz.jiraclient.Issue;
 import net.rcarz.jiraclient.IssueType;
 import net.rcarz.jiraclient.JiraException;
+import net.rcarz.jiraclient.Status;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.util.collections.Sets;
@@ -73,8 +75,13 @@ class JiraTaskServiceTest {
         IssueType issueType = mock(IssueType.class);
         when(issueType.getName()).thenReturn("bug");
         when(issue.getIssueType()).thenReturn(issueType);
+        Status status = mock(Status.class);
+        when(issue.getStatus()).thenReturn(status);
+
         when(jiraClient.getIssue("BUG #1")).thenReturn(issue);
         JiraTaskService jiraTaskService = new JiraTaskService(config, jiraClient, factory);
-        assertEquals(singletonList("BUG #1"), jiraTaskService.additionalEnrichment(Arrays.asList("BUg #1", "BUG #1")));
+        assertNotNull(jiraTaskService.additionalEnrichment(Arrays.asList("BUg #1", "BUG #1")));
+        assertEquals(1, jiraTaskService.additionalEnrichment(Arrays.asList("BUg #1", "BUG #1")).size());
+        assertTrue(jiraTaskService.additionalEnrichment(Arrays.asList("BUg #1", "BUG #1")).contains(new CutIssue("BUG #1", "bug", null)));
     }
 }

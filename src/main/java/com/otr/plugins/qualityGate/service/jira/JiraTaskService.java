@@ -1,6 +1,7 @@
 package com.otr.plugins.qualityGate.service.jira;
 
 import com.otr.plugins.qualityGate.config.JiraConfig;
+import com.otr.plugins.qualityGate.model.jira.CutIssue;
 import com.otr.plugins.qualityGate.service.jira.extractors.IssueExtractor;
 import com.otr.plugins.qualityGate.service.jira.extractors.IssueExtractorFactory;
 import com.otr.plugins.qualityGate.utils.FunUtils;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.*;
 import java.util.regex.Matcher;
+
+import static net.rcarz.jiraclient.Field.DESCRIPTION;
 
 @FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
 @AllArgsConstructor
@@ -31,13 +34,15 @@ public class JiraTaskService {
      * @param tasks primary task list
      * @return enriched task list
      */
-    public List<String> additionalEnrichment(List<String> tasks) {
+    public Set<CutIssue> additionalEnrichment(List<String> tasks) {
+        // вынести в jiraConfig
         final Map<String, JiraConfig.Link> links = new HashMap<>();
         config.getLinks().forEach((k, v) -> links.put(v.getName(), v));
-        List<String> result = new ArrayList<>();
+
+        Set<CutIssue> result = new HashSet<>();
         tasks.forEach(task -> {
             try {
-                Issue issue = jiraClient.getIssue(task);
+                Issue issue = jiraClient.getIssue(task, "issuetype");
                 IssueType type = issue.getIssueType();
                 String linkKey = FunUtils.canonical(type.getName());
                 JiraConfig.Link link = Optional.ofNullable(links.get(linkKey)).orElse(links.get("DEFAULT"));
@@ -53,13 +58,24 @@ public class JiraTaskService {
     }
 
 
-
+    /**
+     * Lightweight rest-api query to get task description by key
+     *
+     * @param key issue key
+     * @return issue-description
+     * @throws JiraException rest exception
+     */
     public String getDescription(String key) throws JiraException {
-        Issue issue = jiraClient.getIssue(key);
+        Issue issue = jiraClient.getIssue(key, DESCRIPTION);
         return issue.getDescription();
     }
 
-
+    /**
+     * Search for tasks by regular expression
+     *
+     * @param messages strings to search for matches
+     * @return set of issue keys
+     */
     public Set<String> parseTicket(String... messages) {
         Set<String> result = new HashSet<>();
         Arrays.stream(messages)
