@@ -9,18 +9,15 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.experimental.FieldDefaults;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang.StringUtils;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.tools.generic.SortTool;
 import org.springframework.stereotype.Component;
 
-import javax.mail.Message;
-import javax.mail.MessagingException;
-import javax.mail.Session;
-import javax.mail.Transport;
-import javax.mail.internet.AddressException;
-import javax.mail.internet.InternetAddress;
-import javax.mail.internet.MimeMessage;
+import javax.mail.*;
+import javax.mail.internet.*;
+import java.io.IOException;
 import java.io.StringWriter;
 import java.util.*;
 
@@ -39,13 +36,20 @@ public class SendMailService {
     SmtpAuthenticator smtpAuthenticator;
 
 
+    public void sendEmails(String content) throws MailException {
+        sendEmails(content, null);
+    }
+
+
     /**
      * Prepares content and sends emails
      *
      * @param content jira-task processing result
+     * @param file path to attachment
+     *
      * @throws MailException handle MessagingException
      */
-    public void sendEmails(String content) throws MailException {
+    public void sendEmails(String content, String file) throws MailException {
         if (mailConfig.isDisable()) {
             return;
         }
@@ -90,9 +94,19 @@ public class SendMailService {
         }
 
         try {
-            message.setContent(content, "text/html; charset=UTF-8");
+            Multipart multipart = new MimeMultipart();
+            BodyPart messageBodyPart = new MimeBodyPart();
+            messageBodyPart.setContent(content, "text/html; charset=UTF-8");
+            multipart.addBodyPart(messageBodyPart);
+            if (StringUtils.isNotEmpty(file)) {
+                MimeBodyPart attachmentPart = new MimeBodyPart();
+                attachmentPart.attachFile(file);
+                multipart.addBodyPart(attachmentPart);
+            }
+
+            message.setContent(multipart);
             Transport.send(message);
-        } catch (MessagingException | NullPointerException e) {
+        } catch (MessagingException | NullPointerException | IOException  e) {
             throw new MailException("Message sending error " + e.getMessage(), e);
         }
     }

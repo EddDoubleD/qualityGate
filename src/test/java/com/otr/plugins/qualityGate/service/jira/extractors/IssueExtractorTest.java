@@ -8,10 +8,7 @@ import com.otr.plugins.qualityGate.service.jira.extractors.impl.LinkExtractor;
 import lombok.AccessLevel;
 import lombok.SneakyThrows;
 import lombok.experimental.FieldDefaults;
-import net.rcarz.jiraclient.Issue;
-import net.rcarz.jiraclient.IssueLink;
-import net.rcarz.jiraclient.IssueType;
-import net.rcarz.jiraclient.JiraException;
+import net.rcarz.jiraclient.*;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.test.context.TestPropertySource;
@@ -46,16 +43,21 @@ class IssueExtractorTest {
         configLink.setIssueTypes(Arrays.asList("bug", "dev"));
         configLink.setJql("SOME FIELD = #{custom_field_1} AND key = #{key}");
 
+        Status status = mock(Status.class);
+        IssueType normalType = mock(IssueType.class);
+
         issue = mock(Issue.class);
         when(issue.getKey()).thenReturn("DEV #1");
         when(issue.getField("custom_field_1")).thenReturn("some value");
+        when(issue.getStatus()).thenReturn(status);
+        when(issue.getIssueType()).thenReturn(normalType);
 
         IssueLink normalLink = mock(IssueLink.class);
         Issue normalIssue = mock(Issue.class);
-        IssueType normalType = mock(IssueType.class);
         when(normalType.getName()).thenReturn("BUG");
         when(normalIssue.getIssueType()).thenReturn(normalType);
         when(normalIssue.getKey()).thenReturn("BUG #1");
+        when(normalIssue.getStatus()).thenReturn(status);
         when(normalLink.getOutwardIssue()).thenReturn(normalIssue);
 
         IssueLink strangeLink = mock(IssueLink.class);
@@ -64,6 +66,8 @@ class IssueExtractorTest {
         when(strangeType.getName()).thenReturn("TASK");
         when(strangeIssue.getIssueType()).thenReturn(strangeType);
         when(strangeIssue.getKey()).thenReturn("TASK #1");
+        when(strangeIssue.getStatus()).thenReturn(status);
+
         when(strangeLink.getOutwardIssue()).thenReturn(strangeIssue);
         List<IssueLink> links = new ArrayList<>() {{
             add(normalLink);
@@ -82,17 +86,17 @@ class IssueExtractorTest {
 
     @Test
     void defaultExtractor() {
-        assertEquals(singletonList("DEV #1"), defaultExtractor.extract(issue, configLink));
+        assertEquals("DEV #1", defaultExtractor. extract(issue, configLink).get(0).key());
     }
 
     @Test
     void linkExtract() {
-        assertEquals(singletonList("BUG #1"), linkExtractor.extract(issue, configLink));
+        assertEquals("BUG #1", linkExtractor.extract(issue, configLink).get(0).key());
     }
 
     @Test
     void jqlExtractor() {
-        assertEquals(singletonList("BUG #1"), jqlExtractor.extract(issue, configLink));
+        assertEquals("BUG #1", jqlExtractor.extract(issue, configLink).get(0).key());
     }
 
     @SneakyThrows

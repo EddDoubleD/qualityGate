@@ -8,5 +8,5 @@ public enum Type {
     // build change log
     CHANGELOG,
     LIST_OF,
-    NONE
+    HELP
 }

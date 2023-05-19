@@ -1,12 +1,14 @@
 package com.otr.plugins.qualityGate.service.jira;
 
 import com.otr.plugins.qualityGate.config.JiraConfig;
+import com.otr.plugins.qualityGate.model.jira.CutIssue;
 import com.otr.plugins.qualityGate.service.jira.extractors.IssueExtractorFactory;
 import com.otr.plugins.qualityGate.service.jira.extractors.impl.DefaultExtractor;
 import lombok.SneakyThrows;
 import net.rcarz.jiraclient.Issue;
 import net.rcarz.jiraclient.IssueType;
 import net.rcarz.jiraclient.JiraException;
+import net.rcarz.jiraclient.Status;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.util.collections.Sets;
@@ -42,7 +44,7 @@ class JiraTaskServiceTest {
         NonVerifyingJiraClient client = mock(NonVerifyingJiraClient.class);
         Issue issue = mock(Issue.class);
         when(issue.getDescription()).thenReturn("description");
-        when(client.getIssue(anyString())).thenReturn(issue);
+        when(client.getIssue(anyString(), anyString())).thenReturn(issue);
         JiraTaskService jiraTaskService = new JiraTaskService(config, client, null);
         assertEquals("description", jiraTaskService.getDescription("KEY"));
     }
@@ -67,14 +69,19 @@ class JiraTaskServiceTest {
         DefaultExtractor defaultExtractor = new DefaultExtractor();
         IssueExtractorFactory factory = new IssueExtractorFactory(Collections.singletonMap("DEFAULT", defaultExtractor));
         NonVerifyingJiraClient jiraClient = mock(NonVerifyingJiraClient.class);
-        when(jiraClient.getIssue("BUg #1")).thenThrow(JiraException.class);
+        when(jiraClient.getIssue("BUg #1", "issuetype")).thenThrow(JiraException.class);
         Issue issue = mock(Issue.class);
         when(issue.getKey()).thenReturn("BUG #1");
         IssueType issueType = mock(IssueType.class);
         when(issueType.getName()).thenReturn("bug");
         when(issue.getIssueType()).thenReturn(issueType);
-        when(jiraClient.getIssue("BUG #1")).thenReturn(issue);
+        Status status = mock(Status.class);
+        when(issue.getStatus()).thenReturn(status);
+
+        when(jiraClient.getIssue("BUG #1", "issuetype")).thenReturn(issue);
         JiraTaskService jiraTaskService = new JiraTaskService(config, jiraClient, factory);
-        assertEquals(singletonList("BUG #1"), jiraTaskService.additionalEnrichment(Arrays.asList("BUg #1", "BUG #1")));
+        assertNotNull(jiraTaskService.additionalEnrichment(Arrays.asList("BUg #1", "BUG #1")));
+        assertEquals(1, jiraTaskService.additionalEnrichment(Arrays.asList("BUg #1", "BUG #1")).size());
+        assertTrue(jiraTaskService.additionalEnrichment(Arrays.asList("BUg #1", "BUG #1")).contains(new CutIssue("BUG #1", "bug", null)));
     }
 }

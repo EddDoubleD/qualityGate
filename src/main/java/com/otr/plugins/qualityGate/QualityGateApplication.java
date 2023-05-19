@@ -2,43 +2,32 @@ package com.otr.plugins.qualityGate;
 
 import com.otr.plugins.qualityGate.config.post.CustomAutowireCandidateResolver;
 import com.otr.plugins.qualityGate.config.post.Type;
-import com.otr.plugins.qualityGate.model.LaunchParam;
-import com.otr.plugins.qualityGate.service.Stopper;
-import com.otr.plugins.qualityGate.service.handler.Handler;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.experimental.FieldDefaults;
+import com.otr.plugins.qualityGate.utils.Splitter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang.mutable.MutableBoolean;
 import org.springframework.beans.factory.support.DefaultListableBeanFactory;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 
-import java.util.*;
+import java.util.List;
 
-@FieldDefaults(level = AccessLevel.PRIVATE, makeFinal = true)
-@AllArgsConstructor
+
 @SpringBootApplication
 @Slf4j
-public class QualityGateApplication implements CommandLineRunner {
+public class QualityGateApplication {
 
-    Map<Type, Handler> handlers;
-
-    LaunchParam param;
-
-    Stopper stopper;
-
+    /**
+     * Mods to launch the application, options available:<br/>
+     * - not set: displays information about the program<br/>
+     * - CHANGE_LOG: will generate a change log and send it to the mail<br/>
+     * - LIST_OF: will generate a list of issues from jira and compare them with the commits given between
+     * startTag/endTag<br/>
+     * - BUILD: initiates project build and performs notification<br/>
+     * <p>
+     * It is possible to use a combination of mods, they will be launched in sequence, if the next mod gives an error,
+     * the chain will end
+     */
     public static void main(String[] args) {
-        Optional<String> mod = Arrays.stream(args)
-                .filter(arg -> arg.startsWith("--mod"))
-                .findFirst();
-        final List<Type> modes = new ArrayList<>();
-
-        mod.ifPresent(s -> modes.addAll(Arrays.stream(s.replace("--mod=", "").split(";"))
-                .map(m -> Type.valueOf(m.toUpperCase()))
-                .toList()));
-
+        final List<Type> modes = Splitter.splitModeType(args);
         SpringApplication application = new SpringApplication(QualityGateApplication.class);
         application.addInitializers(context -> context.addBeanFactoryPostProcessor(beanFactory -> {
             final DefaultListableBeanFactory factory = (DefaultListableBeanFactory) beanFactory;
@@ -46,26 +35,5 @@ public class QualityGateApplication implements CommandLineRunner {
         }));
 
         application.run(args);
-    }
-
-    @Override
-    public void run(String... args) {
-
-        final MutableBoolean mark = new MutableBoolean( true);
-        handlers.forEach((k, v) -> {
-            if (mark.booleanValue()) {
-                log.error("Start task {}", k);
-                Map<Handler.ResulType, Handler.Result> result = v.handle(param);
-                log.error(String.valueOf(result.get(Handler.ResulType.SUCCESS)));
-                if (result.containsKey(Handler.ResulType.ERROR) && result.get(Handler.ResulType.ERROR).getContent().size() > 0) {
-                    log.error(String.valueOf(result.get(Handler.ResulType.ERROR)));
-                    mark.setValue(false);
-                }
-            } else {
-                log.error("execution {} step will be skipped", k);
-            }
-        });
-
-        stopper.stop();
     }
 }
