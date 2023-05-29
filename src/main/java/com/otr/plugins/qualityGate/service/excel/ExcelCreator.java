@@ -26,7 +26,7 @@ public class ExcelCreator {
     );
 
     public String create(Map<Handler.ResulType, Handler.Result> content) {
-        final String fileName = "src/main/resources" + UUID.randomUUID() + ".xls";
+        final String fileName = "src/main/resources/" + UUID.randomUUID() + ".xls";
         try (HSSFWorkbook workbook = new HSSFWorkbook()) {
             content.forEach((k, v) -> {
                 final HSSFSheet sheet = workbook.createSheet(k.name());
