@@ -26,8 +26,8 @@ public class ExcelCreator {
     );
 
     public String create(Map<Handler.ResulType, Handler.Result> content) {
+        final String fileName = "src/main/resources" + UUID.randomUUID() + ".xls";
         try (HSSFWorkbook workbook = new HSSFWorkbook()) {
-            final String fileName = "src/main/resources/" + UUID.randomUUID() + ".xls";
             content.forEach((k, v) -> {
                 final HSSFSheet sheet = workbook.createSheet(k.name());
                 // счетчик для строк
@@ -58,12 +58,13 @@ public class ExcelCreator {
                 }
             });
 
-            return fileName;
+
         } catch (IOException e) {
             log.error(e.getMessage());
+            return null;
         }
 
-        return null;
+        return fileName;
 
     }
 
@@ -78,12 +79,12 @@ public class ExcelCreator {
     }
 
 
-    public CellStyle createRowStyle(Workbook workbook) {
+    private CellStyle createRowStyle(Workbook workbook) {
         CellStyle style = workbook.createCellStyle();
         //style.setWrapText(true);
         return style;
     }
-    public CellStyle createHeaderStyle(Workbook workbook) {
+    private CellStyle createHeaderStyle(Workbook workbook) {
         CellStyle style = workbook.createCellStyle();
         Font font = workbook.createFont();
         font.setFontName("Courier New");
