@@ -37,7 +37,9 @@ public class GitLabApiExecutor {
      * @throws URISyntaxException catch crookedly created url
      */
     public HttpRequest buildGetRequest(String url) throws URISyntaxException {
-        return HttpRequest.newBuilder().uri(new URI(settings.getUrl() + url)).header(PRIVATE_TOKEN, settings.getToken())
+        return HttpRequest.newBuilder()
+                .uri(new URI(settings.getUrl() + url))
+                .header(PRIVATE_TOKEN, settings.getToken())
                 .GET()
                 .build();
     }
