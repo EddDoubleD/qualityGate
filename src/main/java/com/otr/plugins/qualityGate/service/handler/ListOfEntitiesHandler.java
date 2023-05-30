@@ -125,7 +125,7 @@ public class ListOfEntitiesHandler implements Handler {
 
         try {
             String message = sendMailService.buildHtml(null, result);
-            sendMailService.sendEmails(message);
+            sendMailService.sendEmails(message, filename);
 
         } catch (ResourceLoadingException | MailException e) {
             log.error(e.getMessage(), e);
