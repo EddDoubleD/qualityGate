@@ -7,6 +7,14 @@
 [![build](https://github.com/EddDoubleD/qualityGate/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/EddDoubleD/qualityGate/actions/workflows/build.yml) [![codecov](https://codecov.io/gh/EddDoubleD/qualityGate/branch/master/graph/badge.svg?token=TYXJX2Z7TH)](https://codecov.io/gh/EddDoubleD/qualityGate)<br/>
 Service application for customizing gitlab and jira integration
 
+## Features
+Application is launched inside a docker container in the gitlab stage, depending on the set mode of operation, it can perform various actions:
+1. **CHANGE_LOG**: forming changeLog in a given range
+2. **LIST_OF**: comparisons of reported Jira issues and gitLab commits in a given range:
+  2.1. create excel report 
+  2.2. send email notification
+3. **BUILD**: run gitlab build for valid tag/brunch 
+
 ## Settings
 Application setup is divided into several modules, in the main setting, the paths to the settings files are set
 ### application.yml
