@@ -10,9 +10,9 @@ Service application for customizing gitlab and jira integration
 ## Features
 Application is launched inside a docker container in the gitlab stage, depending on the set mode of operation, it can perform various actions:
 1. **CHANGE_LOG**: forming changeLog in a given range
-2. **LIST_OF**: comparisons of reported Jira issues and gitLab commits in a given range:
-  2.1. create excel report 
-  2.2. send email notification
+2. **LIST_OF**: comparisons of reported Jira issues and gitLab commits in a given range:<br/>
+  2.1. create excel report<br/> 
+  2.2. send email notification<br/>
 3. **BUILD**: run gitlab build for valid tag/brunch 
 
 ## Settings
