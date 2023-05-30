@@ -13,7 +13,7 @@ Application is launched inside a docker container in the gitlab stage, depending
 2. **LIST_OF**: comparisons of reported Jira issues and gitLab commits in a given range:<br/>
   2.1. create excel report<br/> 
   2.2. send email notification<br/>
-3. **BUILD**: run gitlab build for valid tag/brunch 
+3. **BUILD**: run gitlab build for valid tag/branch 
 
 ## Settings
 Application setup is divided into several modules, in the main setting, the paths to the settings files are set
